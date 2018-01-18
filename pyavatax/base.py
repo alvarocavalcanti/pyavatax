@@ -648,6 +648,7 @@ class TaxOverride(AvalaraBase):
 class Line(AvalaraBase):
     """Represents an Avalara Line"""
     _fields = ['LineNo', 'DestinationCode', 'OriginCode', 'Qty', 'Amount', 'ItemCode', 'TaxCode', 'CustomerUsageType', 'Description', 'Discounted', 'TaxIncluded', 'Ref1', 'Ref2']
+    _has = ['TaxOverride']
 
     def __init__(self, *args, **kwargs):
         if 'Qty' not in kwargs:
@@ -678,6 +679,14 @@ class Line(AvalaraBase):
         code = getattr(self, 'ItemCode', None)
         if code and len(code) > 50:
             raise AvalaraValidationException(AvalaraException.CODE_TOO_LONG, 'ItemCode cannot be longer than 50 characters')
+
+    def add_override(self, override=None, **kwargs):
+        """Adds a tax override instance to this document"""
+        if kwargs:
+            override = TaxOverride(**kwargs)
+        if not isinstance(override, TaxOverride):
+            raise AvalaraTypeException(AvalaraException.CODE_BAD_OVERRIDE, '%r is not a %r' % (override, TaxOverride))
+        self.TaxOverride = override
 
 
 class Address(AvalaraBase):
